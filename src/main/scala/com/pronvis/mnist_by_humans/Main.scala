@@ -10,13 +10,10 @@ object Main {
   def main(args: Array[String]) {
 
 
-
-
     val input = new File("/Users/pronvis/Downloads/train-images-idx3-ubyte")
-    val output = new File("/Users/pronvis/Downloads/images/xx")
+    val output = new File("/Users/pronvis/scala/mnist_by_humans/mnist_images/")
     MnistReader.convertMnistImageToPng(input, output, BufferedImage.TYPE_BYTE_GRAY)
 
-//    System.exit(1)
     //to read labels
     //    MnistReader.readFile("/Users/pronvis/Downloads/train-labels-idx1-ubyte")
   }
