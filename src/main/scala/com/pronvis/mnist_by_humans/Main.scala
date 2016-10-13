@@ -14,8 +14,9 @@ object Main {
 
     val input = new File("/Users/pronvis/Downloads/train-images-idx3-ubyte")
     val output = new File("/Users/pronvis/Downloads/images/xx")
-    MnistReader.readMnistImage(input, output, BufferedImage.TYPE_BYTE_GRAY)
+    MnistReader.convertMnistImageToPng(input, output, BufferedImage.TYPE_BYTE_GRAY)
 
+//    System.exit(1)
     //to read labels
     //    MnistReader.readFile("/Users/pronvis/Downloads/train-labels-idx1-ubyte")
   }
