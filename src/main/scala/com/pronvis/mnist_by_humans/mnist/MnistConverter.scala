@@ -10,7 +10,7 @@ import org.apache.commons.io.IOUtils
 import com.typesafe.scalalogging._
 import org.slf4j.LoggerFactory
 
-object MnistReader {
+object MnistConverter {
 
   val logger = Logger(LoggerFactory.getLogger(this.getClass))
 
@@ -31,8 +31,8 @@ object MnistReader {
     dataArray
   }
 
-  def convertMnistImageToPng(inputFile: File, outputFile: File, bufferedImageType: Int) = {
-    logger.info(s"Start converting Mnist image: ${inputFile.getAbsolutePath}; to '.png' file: ${outputFile.getAbsolutePath}")
+  def imagesFileToPng(inputFile: File, outputFile: File, bufferedImageType: Int) = {
+    logger.info(s"Start converting Mnist Image File: ${inputFile.getAbsolutePath}; to '.png' files in: ${outputFile.getAbsolutePath}")
     val mnistBytes = IOUtils.toByteArray(inputFile.toURI)
     val magicNumberBytesCount = 4
 
@@ -57,34 +57,53 @@ object MnistReader {
 
     Files.createDirectories(outputFile.toPath)
 
-    val imagesOffset = 4 + (4 * dimensionsCount)
-    val mnistImagesData = mnistBytes.drop(imagesOffset)
+    val mnistImagesData = mnistBytes.drop(mnistBytesOffset(dimensionsCount))
 
-    def oneByOne() = {
-      Range(0, imagesCount).foreach { imgIndex =>
-        val data = getData(imgIndex * (firstDimensionSize * secondDimensionSize), firstDimensionSize * secondDimensionSize, mnistImagesData, dataType)
-        val image = getImageFromFile(data, dataType, firstDimensionSize, secondDimensionSize, bufferedImageType)
+    lazy val imagesStream = Range(0, imagesCount).toStream.map { imgIndex =>
+      val data = getData(imgIndex * (firstDimensionSize * secondDimensionSize), firstDimensionSize * secondDimensionSize, mnistImagesData, dataType)
+      val image = getImageFromFile(data, dataType, firstDimensionSize, secondDimensionSize, bufferedImageType)
+      (imgIndex, image)
+    }
+
+    imagesStream.grouped(ImagesBufferSize).zip(Range(0, imagesCount).iterator).foreach { case (imagesSlice, index) => {
+      imagesSlice.foreach { case (imgIndex, image) =>
         saveImage(outputFile, imgIndex, image)
       }
+      logger.info(s"#${(index + 1) * ImagesBufferSize}/$imagesCount processed")
+    }}
+
+  }
+
+  def labelsFileToArray(inputFile: File, bufferedImageType: Int): Array[ImageLabel] = {
+    logger.info(s"Start converting Mnist Label File: ${inputFile.getAbsolutePath}; to Array[Byte]")
+    val mnistBytes = IOUtils.toByteArray(inputFile.toURI)
+    val magicNumberBytesCount = 4
+
+    val magicNumber = mnistBytes.take(magicNumberBytesCount)
+
+    val dataType = MnistDataType.mnistDataTypes(magicNumber(2))
+    val dimensionsCount = magicNumber(3).toInt
+    logger.debug(s"DataType: $dataType; Number of Dimensions: $dimensionsCount")
+
+    if (dimensionsCount != 1) {
+      logger.error(s"Unsupported size of dimensions: $dimensionsCount")
+      throw new UnsupportedOperationException("Unsupported dimensions in MnistDataFile")
     }
 
-    def byStream() = {
-      lazy val imagesStream = Range(0, imagesCount).toStream.map { imgIndex =>
-        val data = getData(imgIndex * (firstDimensionSize * secondDimensionSize), firstDimensionSize * secondDimensionSize, mnistImagesData, dataType)
-        val image = getImageFromFile(data, dataType, firstDimensionSize, secondDimensionSize, bufferedImageType)
-        (imgIndex, image)
-      }
+    val dimensionSizes = Range(0, dimensionsCount).map(dmns => dimensionFromMnist(dmns, mnistBytes))
 
-      imagesStream.grouped(ImagesBufferSize).zip(Range(0, imagesCount).iterator).foreach { case (imagesSlice, index) => {
-        imagesSlice.foreach { case (imgIndex, image) =>
-          saveImage(outputFile, imgIndex, image)
-        }
-        logger.info(s"#${(index + 1) * ImagesBufferSize}/$imagesCount processed")
-      }}
+    val labelsCount = dimensionSizes(0)
+
+    dimensionSizes.zip(Range(0, dimensionsCount)).foreach(size => logger.debug(s"Dimension ${size._2} size of ${size._1}"))
+
+    val mnistLabelsData = mnistBytes.drop(mnistBytesOffset((dimensionsCount)))
+
+    lazy val labelsStream = Range(0, labelsCount).toStream.map { labelIdx =>
+      val data = getData(labelIdx, 4, mnistLabelsData, dataType)
+      ImageLabel(data.head)
     }
 
-    byStream()
-
+    labelsStream.toArray
   }
 
   private def saveImage(outputFile: File, imgIndex: Int, image: BufferedImage) = {
@@ -104,6 +123,10 @@ object MnistReader {
     val imageRaster = Raster.createRaster(image.getSampleModel, new DataBufferByte(data, width * height), new java.awt.Point())
     image.setData(imageRaster)
     image
+  }
+
+  private def mnistBytesOffset(dimensionsCount: Int) = {
+    4 + (4 * dimensionsCount)
   }
 }
 
