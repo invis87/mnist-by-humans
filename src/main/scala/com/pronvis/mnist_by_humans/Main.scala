@@ -3,15 +3,15 @@ package com.pronvis.mnist_by_humans
 import java.awt.image.BufferedImage
 import java.io.File
 
-import com.pronvis.mnist_by_humans.db.Context
-import com.pronvis.mnist_by_humans.mnist.MnistConverter
 import com.pronvis.mnist_by_humans.db.Context.context._
+import com.pronvis.mnist_by_humans.db.{Circle, Context}
+import com.pronvis.mnist_by_humans.mnist.MnistConverter
 import com.typesafe.scalalogging.Logger
-import io.getquill._
 import org.slf4j.LoggerFactory
-import scala.concurrent.duration._
 
 import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main {
 
@@ -32,28 +32,19 @@ object Main {
 
   def main(args: Array[String]) {
 
-    case class Circle(radius: Float)
-
-    val areas = quote {
-      query[Circle].insert(lift(Circle(2.3f)))
+    def insertCircle(circle: Circle) = quote {
+      query[Circle].insert(lift(circle)).returning(_.id)
     }
 
-    val areas2 = quote {
-      query[Circle].insert(lift(Circle(2.4f)))
-    }
-    val areas3 = quote {
-      query[Circle].insert(lift(Circle(2.5f)))
-    }
-    val areas4 = quote {
-      query[Circle].insert(lift(Circle(2.6f)))
-    }
+    val x1 = Context.context.run(insertCircle(Circle(235f, 44)))
+    val x1Res = Await.result(x1, 4 seconds)
+    logger.debug(s"id of inserting new Circle is $x1Res")
 
-    Context.context.run(areas)
-    Context.context.run(areas2)
-    Context.context.run(areas3)
-    Context.context.run(areas4)
-    Thread.sleep(2000)
+    val q = quote(query[Circle])
+    val insertResult = Context.context.run(q)
 
-//    logger.debug(x.sum.toString)
+    val x: List[Circle] = Await.result(insertResult, 5 seconds)
+    logger.debug(x.map(z => z.radius).mkString("; "))
+
   }
 }

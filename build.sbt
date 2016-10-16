@@ -1,3 +1,5 @@
+import Dependencies.Scala
+
 name := "Mnist by humans"
 
 version := "1.0"
@@ -5,14 +7,33 @@ version := "1.0"
 scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-  "commons-io" % "commons-io" % "2.4",
-  "ch.qos.logback" % "logback-classic" % "1.1.7",
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
-  "com.typesafe" % "config" % "1.3.0",
-  "org.postgresql" % "postgresql" % "9.4.1208",
-  "io.getquill" %% "quill-jdbc" % "0.10.0"
-  )
+  Dependencies.apacheCommon,
+  Dependencies.logbackClassic,
+  Dependencies.scalaLogging,
+  Dependencies.typesafeConfig,
+  Dependencies.postgresSql,
+  Dependencies.quillCore,
+  Dependencies.quillAsyncPostgres
+)
 
+dependencyOverrides ++= Scala.all.toSet
 
 fork in run := true
 cancelable in Global := true
+
+
+import com.github.sbtliquibase.SbtLiquibase
+
+enablePlugins(SbtLiquibase)
+
+liquibaseUsername  := "postgres"
+
+liquibasePassword  := "postgres"
+
+liquibaseDriver    := "org.postgresql.Driver"
+
+liquibaseUrl       := "jdbc:postgresql://localhost:32769/postgres"
+
+liquibaseDataDir   := baseDirectory.value / "src" / "main" / "liquibase"
+
+liquibaseChangelog := liquibaseDataDir.value / "changelog.xml"
