@@ -1,5 +1,3 @@
-import Dependencies.Scala
-
 name := "Mnist by humans"
 
 version := "1.0"
@@ -16,7 +14,7 @@ libraryDependencies ++= Seq(
   Dependencies.quillAsyncPostgres
 )
 
-dependencyOverrides ++= Scala.all.toSet
+dependencyOverrides ++= Dependencies.Scala.all.toSet
 
 fork in run := true
 cancelable in Global := true
