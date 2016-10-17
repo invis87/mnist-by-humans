@@ -9,7 +9,7 @@ object Dependencies {
   val postgresVersion = "9.4.1208"
   val quillVersion = "0.10.0"
 
-  val apacheCommon = "commons-io" % "commons-io" % apacheCommonsVersion
+  val apacheCommonsIO = "commons-io" % "commons-io" % apacheCommonsVersion
   val logbackClassic = "ch.qos.logback" % "logback-classic" % logbackClassicVersion
   val scalaLogging = "com.typesafe.scala-logging" %% "scala-logging" % scalaLoggingVersion exclude("org.slf4j", "slf4j-api")
   val typesafeConfig = "com.typesafe" % "config" % typesafeVersion

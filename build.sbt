@@ -5,7 +5,7 @@ version := "1.0"
 scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-  Dependencies.apacheCommon,
+  Dependencies.apacheCommonsIO,
   Dependencies.logbackClassic,
   Dependencies.scalaLogging,
   Dependencies.typesafeConfig,
