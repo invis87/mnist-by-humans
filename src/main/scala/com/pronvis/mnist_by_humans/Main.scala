@@ -3,15 +3,17 @@ package com.pronvis.mnist_by_humans
 import java.awt.image.BufferedImage
 import java.io.File
 
-import com.pronvis.mnist_by_humans.db.Context.context._
-import com.pronvis.mnist_by_humans.db.{Circle, Context}
+import com.pronvis.mnist_by_humans.db.{ImageLabel, ImagesDataDao, Schema}
+import com.typesafe.config.ConfigFactory
+
+//import com.pronvis.mnist_by_humans.db.Context.context._
+import com.pronvis.mnist_by_humans.db.Entities.ImageData
 import com.pronvis.mnist_by_humans.mnist.MnistConverter
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main {
 
@@ -30,21 +32,25 @@ object Main {
     //    MnistReader.readFile("/Users/pronvis/Downloads/train-labels-idx1-ubyte")
   }
 
+  def main_imageStoring(args: Array[String]) {
+    val mnistImagesFile = new File("/Users/pronvis/Downloads/t10k-images-idx3-ubyte")
+    val directoryForImages = new File("/Users/pronvis/scala/mnist_by_humans/mnist_files/test-images")
+    MnistConverter.imagesFileToPng(mnistImagesFile, directoryForImages, BufferedImage.TYPE_BYTE_GRAY)
+  }
+
   def main(args: Array[String]) {
+    val dbConfig = ConfigFactory.load().getConfig(s"db.test")
+    val schema = new Schema(dbConfig)
+    val imagesDataDao = new ImagesDataDao(schema)
 
-    def insertCircle(circle: Circle) = quote {
-      query[Circle].insert(lift(circle)).returning(_.id)
-    }
 
-    val x1 = Context.context.run(insertCircle(Circle(235f, 44)))
-    val x1Res = Await.result(x1, 4 seconds)
-    logger.debug(s"id of inserting new Circle is $x1Res")
+    val mnistLabelsFile = new File("/Users/pronvis/Downloads/t10k-labels-idx1-ubyte")
+    val labels: Array[ImageLabel] = MnistConverter.labelsFileToArray(mnistLabelsFile, BufferedImage.TYPE_BYTE_GRAY)
 
-    val q = quote(query[Circle])
-    val insertResult = Context.context.run(q)
+    val imagesData = labels.zipWithIndex.map(x => ImageData(s"mnist_files/test-images/${x._2}.png", x._1, false))
+    val x1 = imagesDataDao.insertImages(imagesData.toList)
 
-    val x: List[Circle] = Await.result(insertResult, 5 seconds)
-    logger.debug(x.map(z => z.radius).mkString("; "))
 
+    val x1Res = Await.result(x1, Duration.Inf)
   }
 }

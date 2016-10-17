@@ -4,18 +4,23 @@
         xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
-    <changeSet id="1" author="pronvis">
-        <createTable
-                tableName="circle"
-                schemaName="public">
-            <column name="id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true"/>
-            </column>
-            <column name="radius" type="float"/>
-            <column name="color" type="int"/>
-        </createTable>
-        <rollback>
-            <dropTable tableName="circle"/>
-        </rollback>
-    </changeSet>
+
+	<changeSet id="1" author="pronvis" context="live">
+		<createTable
+			tableName="image_data"
+			schemaName="public">
+			<column name="id" type="bigint" autoIncrement="true">
+				<constraints primaryKey="true" unique="true"/>
+			</column>
+			<column name="image_path" type="varchar(255)">
+				<constraints unique="true"/>
+			</column>
+			<column name="label" type="integer"/>
+			<column name="train_data" type="boolean"/>
+		</createTable>
+		<rollback>
+			<dropTable tableName="image_data"/>
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

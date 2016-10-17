@@ -6,6 +6,7 @@ import java.nio.ByteBuffer
 import java.nio.file.Files
 import javax.imageio.ImageIO
 
+import com.pronvis.mnist_by_humans.db.ImageLabel
 import org.apache.commons.io.IOUtils
 import com.typesafe.scalalogging._
 import org.slf4j.LoggerFactory

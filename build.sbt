@@ -16,6 +16,8 @@ libraryDependencies ++= Seq(
 
 dependencyOverrides ++= Dependencies.Scala.all.toSet
 
+unmanagedClasspath in Compile += baseDirectory.value / "src" / "main" / "resources"
+
 fork in run := true
 cancelable in Global := true
 
