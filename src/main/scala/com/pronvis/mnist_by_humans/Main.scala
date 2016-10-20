@@ -6,7 +6,6 @@ import java.io.File
 import com.pronvis.mnist_by_humans.db.{ImageLabel, ImagesDataDao, Schema}
 import com.typesafe.config.ConfigFactory
 
-//import com.pronvis.mnist_by_humans.db.Context.context._
 import com.pronvis.mnist_by_humans.db.Entities.ImageData
 import com.pronvis.mnist_by_humans.mnist.MnistConverter
 import com.typesafe.scalalogging.Logger

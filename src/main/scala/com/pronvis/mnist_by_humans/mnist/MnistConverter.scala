@@ -39,7 +39,7 @@ object MnistConverter {
 
     val magicNumber = mnistBytes.take(magicNumberBytesCount)
 
-    val dataType = MnistDataType.mnistDataTypes(magicNumber(2))
+    val dataType = MnistDataType.byByte(magicNumber(2))
     val dimensionsCount = magicNumber(3).toInt
     logger.debug(s"DataType: $dataType; Number of Dimensions: $dimensionsCount")
 
@@ -82,7 +82,7 @@ object MnistConverter {
 
     val magicNumber = mnistBytes.take(magicNumberBytesCount)
 
-    val dataType = MnistDataType.mnistDataTypes(magicNumber(2))
+    val dataType = MnistDataType.byByte(magicNumber(2))
     val dimensionsCount = magicNumber(3).toInt
     logger.debug(s"DataType: $dataType; Number of Dimensions: $dimensionsCount")
 
@@ -142,11 +142,11 @@ object MnistDataType {
   case object Float extends MnistDataType(value = 13.toByte, 4)
   case object Double extends MnistDataType(value = 14.toByte, 8)
 
-  val mnistDataTypes = Map(
+  val byByte = Map(
     UnsignedByte.value -> UnsignedByte,
-      SignedByte.value -> SignedByte,
-      Short.value -> Short,
-      Int.value -> Int,
-      Float.value -> Float,
-      Double.value -> Double)
+    SignedByte.value -> SignedByte,
+    Short.value -> Short,
+    Int.value -> Int,
+    Float.value -> Float,
+    Double.value -> Double)
 }
