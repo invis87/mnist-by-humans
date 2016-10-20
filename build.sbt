@@ -16,17 +16,18 @@ lazy val commonSettings = Seq(
   ),
 
   dependencyOverrides ++= Dependencies.Scala.all.toSet,
-  unmanagedClasspath in Compile += baseDirectory.value / "src" / "main" / "resources",
 
   fork in run := true,
   cancelable in Global := true
 )
 
+lazy val mnistTask = InputKey[Unit]("mnist-task", "Start processing mnist files from application.conf 'mnist' part.")
+fullRunInputTask(mnistTask, Runtime, "com.pronvis.mnist_by_humans.mnist.MnistToDB")
+
 lazy val root = (project in file(".")).
   settings(commonSettings: _*)
 
-lazy val mnistTask = taskKey[Unit]("Start processing mnist files from application.conf 'mnist' part.")
-mnistTask := (runMain in Compile).toTask(" com.pronvis.mnist_by_humans.mnist.MnistToDB").value
+
 
 import com.github.sbtliquibase.SbtLiquibase
 

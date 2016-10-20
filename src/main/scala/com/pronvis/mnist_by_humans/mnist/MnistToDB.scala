@@ -21,7 +21,7 @@ object MnistToDB extends LazyLogging {
     job match {
       case "save labels in database"        => labelsRelated(config)
       case "parse images file to directory" => imagesRelated(config)
-      case any => logger.error(s"Wrong job name: $any")
+      case any                              => logger.error(s"Wrong job name: $any")
     }
   }
 
@@ -43,13 +43,14 @@ object MnistToDB extends LazyLogging {
     val mnistLabelsFile = new File(config.getString("labelsParsing.labelsFilePath"))
     val labels: Array[ImageLabel] = MnistConverter.labelsFileToArray(mnistLabelsFile, BufferedImage.TYPE_BYTE_GRAY)
 
-    val imagesData = labels.zipWithIndex.map(x => ImageData(s"$mnistLabelsFile/${x._2}.png", x._1, isTrain))
+    val imagesData = labels.zipWithIndex.map(x => ImageData(s"$mnistLabelsFile/${ x._2 }.png", x._1, isTrain))
     val insertFuture = imagesDataDao.insertImages(imagesData.toList)
 
 
     val timer = new Timer("loggerTimer", false)
     timer.schedule(new TimerTask {
-      def run()= logger.debug(".") }, 1000)
+      def run() = logger.debug(".")
+    }, 1000)
     Await.result(insertFuture, Duration.Inf)
   }
 
