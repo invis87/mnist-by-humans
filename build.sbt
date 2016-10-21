@@ -21,25 +21,41 @@ lazy val commonSettings = Seq(
   cancelable in Global := true
 )
 
-lazy val mnistTask = InputKey[Unit]("mnist-task", "Start processing mnist files from application.conf 'mnist' part.")
-fullRunInputTask(mnistTask, Runtime, "com.pronvis.mnist_by_humans.mnist.MnistToDB")
-
 lazy val root = (project in file(".")).
   settings(commonSettings: _*)
 
 
+lazy val mnistTask = InputKey[Unit]("mnist-task", "Start processing mnist files from application.conf 'mnist' part.")
+fullRunInputTask(mnistTask, Runtime, "com.pronvis.mnist_by_humans.mnist.MnistToDB")
+
+
+
+
+// ===================
+// ====== MAGIC ======
+// ===================
+
+import com.typesafe.config._
+lazy val configTask = settingKey[Config]("start liquibase plugin")
+configTask in ThisBuild := {
+  val resourceDir = (resourceDirectory in Compile).value
+  val appConfig = ConfigFactory.parseFile(resourceDir / "application.conf")
+  val config = ConfigFactory.load(appConfig)
+  println(s"'application.conf' loaded from ${resourceDir.getPath}")
+  config
+}
 
 import com.github.sbtliquibase.SbtLiquibase
 
 enablePlugins(SbtLiquibase)
 
-liquibaseUsername  := "postgres"
+liquibaseUsername  := configTask.value.getString("global.db.user")
 
-liquibasePassword  := "postgres"
+liquibasePassword  := configTask.value.getString("global.db.password")
 
-liquibaseDriver    := "org.postgresql.Driver"
+liquibaseDriver    := configTask.value.getString("global.db.driver")
 
-liquibaseUrl       := "jdbc:postgresql://localhost:32769/postgres"
+liquibaseUrl       := configTask.value.getString("global.db.url")
 
 liquibaseDataDir   := baseDirectory.value / "src" / "main" / "liquibase"
 

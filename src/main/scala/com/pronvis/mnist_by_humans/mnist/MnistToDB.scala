@@ -15,7 +15,7 @@ import scala.concurrent.duration.Duration
 object MnistToDB extends LazyLogging {
 
   def main(args: Array[String]) {
-    val config = ConfigFactory.load().getConfig(s"mnist")
+    val config = ConfigFactory.load().getConfig("mnist")
 
     val job = config.getString("whatToDo")
     job match {
