@@ -1,6 +1,6 @@
 
 lazy val commonSettings = Seq(
-  organization := "com.example",
+  organization := "com.pronvis",
   version := "0.1",
   name := "Mnist by humans",
   scalaVersion := "2.11.8",
