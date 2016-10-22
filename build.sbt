@@ -1,3 +1,5 @@
+import sbt.Keys._
+import sbt._
 
 lazy val commonSettings = Seq(
   organization := "com.pronvis",
@@ -12,23 +14,26 @@ lazy val commonSettings = Seq(
     Dependencies.typesafeConfig,
     Dependencies.postgresSql,
     Dependencies.quillCore,
-    Dependencies.quillAsyncPostgres
+    Dependencies.quillAsyncPostgres,
+
+    Dependencies.http4sDsl,
+    Dependencies.http4sBlazeServer
   ),
 
   dependencyOverrides ++= Dependencies.Scala.all.toSet,
 
-  fork in run := true,
+  fork in Global := true,
   cancelable in Global := true
 )
 
 lazy val root = (project in file(".")).
   settings(commonSettings: _*)
 
+lazy val runMnist = TaskKey[Unit]("run-mnist", "Start processing mnist files from application.conf 'mnist' part.")
+fullRunTask(runMnist, Runtime, "com.pronvis.mnist_by_humans.mnist.MnistToDB")
 
-lazy val mnistTask = InputKey[Unit]("mnist-task", "Start processing mnist files from application.conf 'mnist' part.")
-fullRunInputTask(mnistTask, Runtime, "com.pronvis.mnist_by_humans.mnist.MnistToDB")
-
-
+lazy val runServer = TaskKey[Unit]("run-server", "Start web server.")
+fullRunTask(runServer, Runtime, "com.pronvis.mnist_by_humans.Main")
 
 
 // ===================
